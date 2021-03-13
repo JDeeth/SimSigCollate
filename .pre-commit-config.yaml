@@ -1,15 +1,20 @@
 repos:
-  - repo: https://github.com/ambv/black
-    rev: stable
+  - repo: local
     hooks:
       - id: black
-        language_version: python3.7
-  - repo: https://github.com/pycqa/pylint
-    rev: pylint-2.7.2
+        name: black
+        entry: black
+        language: system
+        types: [python]
+  - repo: local
     hooks:
       - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
         types: [python]
-        additional_dependencies: [pylint_flask_sqlalchemy]
+        args: [--score=no, --jobs=0, --output-format=colorized]
+
   - repo: local
     hooks:
       - id: pytest-check

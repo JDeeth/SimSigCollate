@@ -7,6 +7,8 @@ from config import Config
 from app.models import db, SimSigServer
 from app.schemas import ma, servers_schema, server_schema
 
+# pylint: disable=redefined-builtin
+
 
 def create_app(config_class=Config):
     """Set up Flask app in a very standard way"""
@@ -26,8 +28,9 @@ def create_app(config_class=Config):
         return servers_schema.jsonify(all_servers)
 
     @app.route("/servers/<int:id>")
-    def get_server():
-        pass
+    def get_server(id):
+        server = SimSigServer.query.get_or_404(id)
+        return server_schema.jsonify(server)
 
     @app.route("/servers/", methods=["POST"])
     def create_server():
@@ -43,7 +46,7 @@ def create_app(config_class=Config):
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            response = jsonify({"message": "uri not unique"})
+            response = jsonify({"message": "uri already added"})
             response.status_code = 400
             return response
 
@@ -51,6 +54,19 @@ def create_app(config_class=Config):
         response.headers["location"] = server.url
         response.status_code = 201
         return response
+
+    @app.route("/servers/<int:id>", methods=["DELETE"])
+    def delete_server(id):
+        server = SimSigServer.query.get_or_404(id)
+        db.session.delete(server)
+        db.session.commit()
+        return jsonify({"message": "deleted"})
+
+    @app.errorhandler(404)
+    def page_not_found(_):
+        resp = jsonify({"error": "not found"})
+        resp.status_code = 404
+        return resp
 
     return app
 

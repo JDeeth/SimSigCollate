@@ -8,10 +8,15 @@ db = SQLAlchemy()
 class SimSigServer(db.Model):
     """
     Represents a connection to a SimSig game.
+    Autoincrement turned on against Sqlite's advice to prevent repeated
+    deletion of a server from deleting subsequent servers
     """
 
     __tablename__ = "simsig_servers"
-    __table_args__ = (UniqueConstraint("uri_host", "uri_port", name="uri_uc"),)
+    __table_args__ = (
+        UniqueConstraint("uri_host", "uri_port", name="uri_uc"),
+        {"sqlite_autoincrement": True},
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
